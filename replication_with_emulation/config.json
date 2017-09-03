@@ -1,0 +1,32 @@
+{
+    "language"        : "PYTHON",
+    "main-file"       : "master.py",
+    "experiment-name" : "replication",
+    "likelihood"      : "GAUSSIAN",
+    "variables" : {
+        "bandwidth" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 1
+        },
+        "delay" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 1
+        },
+        "uplink_queue" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 1
+        },
+        "uplink_loss" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 1
+        }
+    }
+}

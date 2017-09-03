@@ -1,0 +1,6 @@
+TABLE
+*search_log
+perf_data_dir/
+replicate_logs/
+traces
+output
