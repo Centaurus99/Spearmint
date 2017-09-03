@@ -66,15 +66,19 @@ def collect_data(args):
     perf_data_f = open(perf_data_path, 'w')
 
     for scheme in pickle_data:
-        assert len(pickle_data[scheme]) == 1
+        if len(pickle_data[scheme]) != 1:
+            return False
+
         run_id = 1
 
         stats = pickle_data[scheme][run_id]
         if stats is None:
-            continue
+            return False
 
         flows = parse_run_stats(stats.split('\n'))
-        assert len(flows) == 1
+        if len(flows) != 1:
+            return False
+
         f = 1
 
         tput = flows[f][0]
@@ -82,6 +86,7 @@ def collect_data(args):
         perf_data_f.write('%s,%.2f,%.2f\n' % (scheme, tput, delay))
 
     perf_data_f.close()
+    return True
 
 
 def main():
@@ -105,9 +110,13 @@ def main():
     args['uplink_loss'] = prog_args.uplink_loss
     args['schemes'] = prog_args.schemes
 
-    run_test(args)
-    run_analysis(args)
-    collect_data(args)
+    while True:
+        run_test(args)
+        run_analysis(args)
+        if collect_data(args):
+            break
+        else:
+            sys.stderr.write('worker.py: re-running test\n')
 
 
 if __name__ == '__main__':

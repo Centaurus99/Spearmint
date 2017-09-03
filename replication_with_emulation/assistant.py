@@ -14,6 +14,8 @@ def run_cmd(host, cmd):
         cmd = ('rm -rf /tmp/pantheon-tmp; '
                'python ~/pantheon/helpers/pkill.py; '
                'pkill -f pantheon')
+    elif cmd == 'pull_spearmint':
+        cmd = 'cd ~/Spearmint && git pull'
 
     ssh_cmd = ['ssh', host, cmd]
     return Popen(ssh_cmd)
