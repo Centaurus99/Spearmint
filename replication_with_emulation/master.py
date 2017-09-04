@@ -7,7 +7,7 @@ import time
 import pickle
 import numpy as np
 from os import path
-from subprocess import Popen, check_call
+from subprocess import Popen, check_call, call
 from helpers import (CURRDIR, parse_settings, worker_ips, parse_run_stats,
                      make_sure_path_exists, get_abs_diff, utc_date)
 
@@ -38,7 +38,11 @@ def collect_perf_data(args, ip_dict):
                 continue
 
             with open(perf_data_file) as perf_data_handle:
-                perf_list = perf_data_handle.readline().split(',')
+                line = perf_data_handle.readline()
+                if not line:
+                    continue
+
+                perf_list = line.split(',')
                 scheme = perf_list[0]
 
                 if scheme not in perf:

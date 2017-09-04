@@ -4,7 +4,7 @@ import sys
 import argparse
 import signal
 from subprocess import Popen, call
-from helpers import worker_ips, aws_worker_ips, timeout_handler, TimeoutError
+from helpers import worker_ips, timeout_handler, TimeoutError
 
 
 def run_cmd(host, cmd):

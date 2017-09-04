@@ -68,29 +68,27 @@ def collect_data(args):
     with open(pickle_data_path) as pickle_data_file:
         pickle_data = pickle.load(pickle_data_file)
 
-    perf_data_f = open(perf_data_path, 'w')
+    with open(perf_data_path, 'w') as perf_data_f:
+        for scheme in pickle_data:
+            if len(pickle_data[scheme]) != 1:
+                return False
 
-    for scheme in pickle_data:
-        if len(pickle_data[scheme]) != 1:
-            return False
+            run_id = 1
 
-        run_id = 1
+            stats = pickle_data[scheme][run_id]
+            if stats is None:
+                return False
 
-        stats = pickle_data[scheme][run_id]
-        if stats is None:
-            return False
+            flows = parse_run_stats(stats.split('\n'))
+            if len(flows) != 1:
+                return False
 
-        flows = parse_run_stats(stats.split('\n'))
-        if len(flows) != 1:
-            return False
+            f = 1
 
-        f = 1
+            tput = flows[f][0]
+            delay = flows[f][1]
+            perf_data_f.write('%s,%.2f,%.2f\n' % (scheme, tput, delay))
 
-        tput = flows[f][0]
-        delay = flows[f][1]
-        perf_data_f.write('%s,%.2f,%.2f\n' % (scheme, tput, delay))
-
-    perf_data_f.close()
     return True
 
 
