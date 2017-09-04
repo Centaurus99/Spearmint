@@ -21,6 +21,11 @@ def run_cmd(host, cmd):
     return Popen(ssh_cmd)
 
 
+def remove_key(ip):
+    cmd = 'ssh-keygen -f "/home/francisyyan/.ssh/known_hosts" -R ' + ip
+    call(cmd, shell=True)
+
+
 def test_ssh(host):
     cmd = ['ssh', '-oStrictHostKeyChecking=no', host, 'echo $HOSTNAME']
 
@@ -54,7 +59,9 @@ def main():
     for ip in ip_list:
         host = args.username + '@' + ip
 
-        if args.cmd == 'test_ssh':
+        if args.cmd == 'remove_key':
+            remove_key(ip)
+        elif args.cmd == 'test_ssh':
             test_ssh(host)
         else:
             procs.append(run_cmd(host, args.cmd))
