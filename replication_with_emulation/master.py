@@ -15,6 +15,7 @@ from helpers import (CURRDIR, parse_settings, gce_worker_ips, parse_run_stats,
 def collect_perf_data(args, ip_dict):
     perf_data_dir = path.join(CURRDIR, 'perf_data_dir')
     make_sure_path_exists(perf_data_dir)
+    call('rm -rf %s/*' % perf_data_dir, shell=True)
 
     # scp perf_data
     scp_procs = []
@@ -33,31 +34,40 @@ def collect_perf_data(args, ip_dict):
     for cc in args['schemes']:
         for run_id in xrange(1, args['run_times'] + 1):
             perf_data_file = path.join(perf_data_dir, '%s_%d' % (cc, run_id))
+            if not path.isfile(perf_data_file):
+                continue
+
             with open(perf_data_file) as perf_data_handle:
                 perf_list = perf_data_handle.readline().split(',')
-                friendly_cc = perf_list[0]
+                scheme = perf_list[0]
 
-                if friendly_cc not in perf:
-                    perf[friendly_cc] = {}
-                    perf[friendly_cc]['tput'] = []
-                    perf[friendly_cc]['delay'] = []
+                if scheme not in perf:
+                    perf[scheme] = {}
+                    perf[scheme]['tput'] = []
+                    perf[scheme]['delay'] = []
 
-                perf[friendly_cc]['tput'].append(float(perf_list[1]))
-                perf[friendly_cc]['delay'].append(float(perf_list[2]))
+                perf[scheme]['tput'].append(float(perf_list[1]))
+                perf[scheme]['delay'].append(float(perf_list[2]))
 
     for scheme in perf:
         tput_list = perf[scheme]['tput']
-        perf[scheme]['tput'] = np.median(tput_list)
+        if tput_list:
+            perf[scheme]['tput'] = np.median(tput_list)
+        else:
+            perf[scheme]['tput'] = float('nan')
 
         delay_list = perf[scheme]['delay']
-        perf[scheme]['delay'] = np.median(delay_list)
+        if delay_list:
+            perf[scheme]['delay'] = np.median(delay_list)
+        else:
+            perf[scheme]['delay'] = float('nan')
 
     return perf
 
 
 def write_search_log(args, tput_loss, delay_loss, overall_loss):
     args['search_log'].write(
-        'bandwidth=%.1f,delay=%d,uplink_queue=%d,uplink_loss=%.4f,'
+        'bandwidth=%.2f,delay=%d,uplink_queue=%d,uplink_loss=%.4f,'
         'downlink_loss=%.4f,tput_loss=%.2f,delay_loss=%.2f,'
         'overall_median_score=%.2f,time=%s\n'
         % (args['bandwidth'], args['delay'],
@@ -92,7 +102,7 @@ def run_experiment(args):
     worker = '~/Spearmint/replication_with_emulation/worker.py'
 
     worker_args = []
-    worker_args += ['--bandwidth', '%.1f' % args['bandwidth']]
+    worker_args += ['--bandwidth', '%.2f' % args['bandwidth']]
     worker_args += ['--delay', '%d' % args['delay']]
     worker_args += ['--uplink-queue', '%d' % args['uplink_queue']]
     worker_args += ['--uplink-loss', '%.4f' % args['uplink_loss']]
@@ -182,7 +192,6 @@ def add_normalized_params(args, params):
 
 def prepare_args():
     args = parse_settings()
-
     args['ips'] = gce_worker_ips()
 
     # sanity check on # of workers

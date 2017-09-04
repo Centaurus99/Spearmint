@@ -2,9 +2,8 @@
 
 import sys
 import pickle
-import shutil
 import argparse
-from subprocess import check_call
+from subprocess import call, check_call
 from os import path
 from helpers import CURRDIR, parse_run_stats
 
@@ -13,7 +12,7 @@ def gen_trace(bw):
     gen_trace_path = path.join(CURRDIR, 'generate_trace.py')
     traces_dir = path.join(CURRDIR, 'traces')
 
-    bw = '%.1f' % bw
+    bw = '%.2f' % bw
     cmd = ['python', gen_trace_path, '--bandwidth', bw,
            '--output-dir', traces_dir]
     sys.stderr.write('+ %s\n' % ' '.join(cmd))
@@ -23,9 +22,9 @@ def gen_trace(bw):
 
 
 def run_test(args):
-    # remove ~/pantheon/test/data
+    # remove contents in ~/pantheon/test/data
     data_dir = path.expanduser('~/pantheon/test/data')
-    shutil.rmtree(data_dir, ignore_errors=True)
+    call('rm -rf %s/*' % data_dir, shell=True)
 
     # run test.py
     cmd = '~/pantheon/test/test.py local --pkill-cleanup'
@@ -54,12 +53,16 @@ def run_test(args):
 def run_analysis(args):
     # run plot.py and generate pantheon/test/data/perf_data.pkl
     cmd = '~/pantheon/analysis/plot.py --no-graphs'
+    sys.stderr.write('+ %s\n' % cmd)
     check_call(cmd, shell=True)
 
 
 def collect_data(args):
     # write cc, tput, delay to perf_data
     pickle_data_path = path.expanduser('~/pantheon/test/data/perf_data.pkl')
+    if not path.isfile(pickle_data_path):
+        return False
+
     perf_data_path = path.expanduser('~/pantheon/test/data/perf_data')
 
     with open(pickle_data_path) as pickle_data_file:
@@ -114,7 +117,7 @@ def main():
     args['downlink_loss'] = prog_args.downlink_loss
     args['schemes'] = prog_args.schemes
 
-    while True:
+    for i in xrange(2):  # re-run test at most twice
         run_test(args)
         run_analysis(args)
         if collect_data(args):

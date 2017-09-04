@@ -3,7 +3,7 @@ import os
 from os import path
 import re
 import yaml
-import shutil
+import math
 import errno
 from datetime import datetime
 from subprocess import check_output
@@ -91,7 +91,10 @@ def parse_run_stats(stats):
 
 
 def get_abs_diff(metric_1, metric_2):
-     return 1.0 * abs(metric_2 - metric_1) / metric_1
+    if math.isnan(metric_1) or math.isnan(metric_2):
+        return 10000.0
+    else:
+        return 1.0 * abs(metric_2 - metric_1) / metric_1
 
 
 def utc_date():
