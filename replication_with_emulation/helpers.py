@@ -96,3 +96,11 @@ def get_abs_diff(metric_1, metric_2):
 
 def utc_date():
     return datetime.utcnow().strftime('%Y-%m-%dT%H-%M')
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def timeout_handler(signum, frame):
+    raise TimeoutError()
