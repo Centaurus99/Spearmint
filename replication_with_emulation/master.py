@@ -250,15 +250,7 @@ def process_replicate_logs(args):
     return cali_data_dict
 
 
-def cleanup():
-    assistant = path.join(CURRDIR, 'assistant.py')
-    check_call([assistant, 'cleanup'])
-
-
 def main(job_id, params):
-    # run pkill
-    cleanup()
-
     args = prepare_args()
 
     # process replicate_logs

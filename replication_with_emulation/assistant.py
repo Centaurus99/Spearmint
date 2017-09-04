@@ -12,8 +12,7 @@ def run_cmd(host, cmd):
                './test/setup.py --all --setup')
     elif cmd == 'cleanup':
         cmd = ('rm -rf /tmp/pantheon-tmp; '
-               'python ~/pantheon/helpers/pkill.py; '
-               'pkill -f pantheon')
+               'python ~/pantheon/helpers/pkill.py; ')
     elif cmd == 'pull_spearmint':
         cmd = 'cd ~/Spearmint && git pull'
 
