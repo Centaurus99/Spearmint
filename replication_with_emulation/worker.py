@@ -39,6 +39,8 @@ def run_test(args):
         extra_cmds.append('mm-delay %d' % args['delay'])
     if args['uplink_loss'] > 0:
         extra_cmds.append('mm-loss uplink %s' % args['uplink_loss'])
+    if args['downlink_loss'] > 0:
+        extra_cmds.append('mm-loss downlink %s' % args['downlink_loss'])
     if extra_cmds:
         cmd += ' --prepend-mm-cmds "%s"' % ' '.join(extra_cmds)
 
@@ -95,6 +97,7 @@ def main():
     parser.add_argument('--delay', type=int, required=True)
     parser.add_argument('--uplink-queue', type=int, required=True)
     parser.add_argument('--uplink-loss', type=float, required=True)
+    parser.add_argument('--downlink-loss', type=float, required=True)
     parser.add_argument('--schemes',
                         metavar='"SCHEME1 SCHEME2..."', required=True)
     prog_args = parser.parse_args()
@@ -108,6 +111,7 @@ def main():
     args['delay'] = prog_args.delay
     args['uplink_queue'] = prog_args.uplink_queue
     args['uplink_loss'] = prog_args.uplink_loss
+    args['downlink_loss'] = prog_args.downlink_loss
     args['schemes'] = prog_args.schemes
 
     while True:

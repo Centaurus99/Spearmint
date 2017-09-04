@@ -27,6 +27,12 @@
             "size" : 1,
             "min"  : 0,
             "max"  : 1
+        },
+        "downlink_loss" : {
+            "type" : "FLOAT",
+            "size" : 1,
+            "min"  : 0,
+            "max"  : 1
         }
     }
 }
