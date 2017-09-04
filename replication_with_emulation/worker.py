@@ -115,13 +115,15 @@ def main():
     args['downlink_loss'] = prog_args.downlink_loss
     args['schemes'] = prog_args.schemes
 
-    for i in xrange(2):  # re-run test at most twice
+    RERUN = 1
+    for i in xrange(RERUN + 1):  # run tests at most twice
         run_test(args)
         run_analysis(args)
         if collect_data(args):
             break
         else:
-            sys.stderr.write('worker.py: re-running test\n')
+            if i < RERUN:
+                sys.stderr.write('worker.py: re-running test\n')
 
 
 if __name__ == '__main__':

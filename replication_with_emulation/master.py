@@ -117,7 +117,12 @@ def run_experiment(args):
     ip_dict = {}
     worker_procs = []
 
-    for cc in args['schemes']:
+    schemes = args['schemes']
+    if 'bbr' in schemes:
+        schemes.remove('bbr')
+        schemes = ['bbr'] + schemes
+
+    for cc in schemes:
         for run_id in xrange(1, args['run_times'] + 1):
             ip = args['ips'][ip_idx]
             ip_idx += 1
