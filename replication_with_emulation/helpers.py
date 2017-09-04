@@ -16,16 +16,35 @@ def parse_settings():
         return yaml.load(settings)
 
 
-def gce_worker_ips():
-    table = path.join(CURRDIR, 'TABLE')
+def get_ip_list_from_table(table):
     cmd = 'grep -E -o "([0-9]{1,3}[\.]){3}[0-9]{1,3}" ' + table
     ip_list = check_output(cmd, shell=True).split()
 
-    internal_ips = []
-    for i in xrange(0, len(ip_list), 2):
-        internal_ips.append(ip_list[i])
+    return ip_list
 
-    return internal_ips
+
+def worker_ips():
+    awstable = path.join(CURRDIR, 'AWSTABLE')
+    gcetable = path.join(CURRDIR, 'GCETABLE')
+
+    if not path.isfile(awstable):
+        awstable = None
+
+    if not path.isfile(gcetable):
+        gcetable = None
+
+    if awstable is not None:
+        return get_ip_list_from_table(awstable)
+    elif gcetable is not None:
+        ip_list = get_ip_list_from_table(gcetable)
+
+        internal_ips = []
+        for i in xrange(0, len(ip_list), 2):
+            internal_ips.append(ip_list[i])
+
+        return internal_ips
+    else:
+        sys.exit('AWSTABLE or GCETABLE does not exist!')
 
 
 def make_sure_path_exists(target_path):

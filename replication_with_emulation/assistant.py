@@ -4,7 +4,7 @@ import sys
 import argparse
 import signal
 from subprocess import Popen, call
-from helpers import gce_worker_ips, timeout_handler, TimeoutError
+from helpers import worker_ips, aws_worker_ips, timeout_handler, TimeoutError
 
 
 def run_cmd(host, cmd):
@@ -48,7 +48,7 @@ def main():
     parser.add_argument('cmd', metavar='CMD')
     args = parser.parse_args()
 
-    ip_list = gce_worker_ips()
+    ip_list = worker_ips()
     procs = []
 
     for ip in ip_list:

@@ -8,7 +8,7 @@ import pickle
 import numpy as np
 from os import path
 from subprocess import Popen, check_call
-from helpers import (CURRDIR, parse_settings, gce_worker_ips, parse_run_stats,
+from helpers import (CURRDIR, parse_settings, worker_ips, parse_run_stats,
                      make_sure_path_exists, get_abs_diff, utc_date)
 
 
@@ -192,7 +192,7 @@ def add_normalized_params(args, params):
 
 def prepare_args():
     args = parse_settings()
-    args['ips'] = gce_worker_ips()
+    args['ips'] = worker_ips()
 
     # sanity check on # of workers
     num_workers = len(args['ips'])
