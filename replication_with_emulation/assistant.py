@@ -23,22 +23,13 @@ def run_cmd(host, cmd):
 
 def remove_key(ip):
     cmd = 'ssh-keygen -f "/home/francisyyan/.ssh/known_hosts" -R ' + ip
-    call(cmd, shell=True)
+    return Popen(cmd, shell=True)
 
 
 def test_ssh(host):
-    cmd = ['ssh', '-oStrictHostKeyChecking=no', host, 'echo $HOSTNAME']
-
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(5)
-
-    try:
-        if call(cmd) != 0:
-            sys.stderr.write('Error connecting %s\n' % host)
-    except TimeoutError:
-        sys.stderr.write('Timed out connecting %s\n' % host)
-    else:
-        signal.alarm(0)
+    cmd = ['ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=5',
+            host, 'echo $HOSTNAME']
+    return Popen(cmd)
 
 
 def main():
@@ -60,9 +51,10 @@ def main():
         host = args.username + '@' + ip
 
         if args.cmd == 'remove_key':
-            remove_key(ip)
+            procs.append(remove_key(ip))
         elif args.cmd == 'test_ssh':
-            test_ssh(host)
+            sys.stderr.write('%d IPs in total\n' % len(ip_list))
+            procs.append(test_ssh(host))
         else:
             procs.append(run_cmd(host, args.cmd))
 
