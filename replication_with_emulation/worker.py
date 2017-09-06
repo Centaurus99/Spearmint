@@ -27,7 +27,8 @@ def run_test(args):
     call('rm -rf %s/*' % data_dir, shell=True)
 
     # run test.py
-    cmd = '~/pantheon/test/test.py local --pkill-cleanup'
+    cmd = ('~/pantheon/test/test.py local --pkill-cleanup '
+           '--cross-traffic-rate %.2f' % args['ct_rate'])
 
     cmd += ' --schemes "%s"' % args['schemes']
     cmd += ' --uplink-trace %s' % args['uplink_trace']
@@ -37,9 +38,7 @@ def run_test(args):
     if args['delay'] > 0:
         extra_cmds.append('mm-delay %d' % args['delay'])
     if args['uplink_loss'] > 0:
-        extra_cmds.append('mm-loss uplink %s' % args['uplink_loss'])
-    if args['downlink_loss'] > 0:
-        extra_cmds.append('mm-loss downlink %s' % args['downlink_loss'])
+        extra_cmds.append('mm-loss uplink %.4f' % args['uplink_loss'])
     if extra_cmds:
         cmd += ' --prepend-mm-cmds "%s"' % ' '.join(extra_cmds)
 
@@ -80,9 +79,6 @@ def collect_data(args):
                 return False
 
             flows = parse_run_stats(stats.split('\n'))
-            if len(flows) != 1:
-                return False
-
             f = 1
 
             tput = flows[f][0]
@@ -98,7 +94,7 @@ def main():
     parser.add_argument('--delay', type=int, required=True)
     parser.add_argument('--uplink-queue', type=int, required=True)
     parser.add_argument('--uplink-loss', type=float, required=True)
-    parser.add_argument('--downlink-loss', type=float, required=True)
+    parser.add_argument('--ct-rate-portion', type=float, required=True)
     parser.add_argument('--schemes',
                         metavar='"SCHEME1 SCHEME2..."', required=True)
     prog_args = parser.parse_args()
@@ -112,7 +108,7 @@ def main():
     args['delay'] = prog_args.delay
     args['uplink_queue'] = prog_args.uplink_queue
     args['uplink_loss'] = prog_args.uplink_loss
-    args['downlink_loss'] = prog_args.downlink_loss
+    args['ct_rate'] = prog_args.bandwidth * prog_args.ct_rate_portion
     args['schemes'] = prog_args.schemes
 
     RERUN = 1

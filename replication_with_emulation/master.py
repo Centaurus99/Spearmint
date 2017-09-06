@@ -71,11 +71,11 @@ def collect_perf_data(args, ip_dict):
 
 def write_search_log(args, tput_loss, delay_loss, overall_loss):
     args['search_log'].write(
-        'bandwidth=%.2f,delay=%d,uplink_queue=%d,uplink_loss=%.4f,'
-        'downlink_loss=%.4f,tput_loss=%.2f,delay_loss=%.2f,'
+        'bandwidth=%.2f,delay=%d,uplink_queue=%d,'
+        'uplink_loss=%.4f,ct_rate_portion=%.2f,tput_loss=%.2f,delay_loss=%.2f,'
         'overall_median_score=%.2f,time=%s\n'
         % (args['bandwidth'], args['delay'],
-           args['uplink_queue'], args['uplink_loss'], args['downlink_loss'],
+           args['uplink_queue'], args['uplink_loss'], args['ct_rate_portion'],
            tput_loss, delay_loss, overall_loss, utc_date()))
 
 
@@ -110,7 +110,7 @@ def run_experiment(args):
     worker_args += ['--delay', '%d' % args['delay']]
     worker_args += ['--uplink-queue', '%d' % args['uplink_queue']]
     worker_args += ['--uplink-loss', '%.4f' % args['uplink_loss']]
-    worker_args += ['--downlink-loss', '%.4f' % args['downlink_loss']]
+    worker_args += ['--ct-rate-portion', '%.2f' % args['ct_rate_portion']]
     base_cmd = 'python %s %s' % (worker, ' '.join(worker_args))
 
     ip_idx = 0
@@ -155,15 +155,12 @@ def add_normalized_params(args, params):
                    args['uplink_queue_bounds']['max']))
     bounds.append((args['uplink_loss_bounds']['min'],
                    args['uplink_loss_bounds']['max']))
-    bounds.append((args['downlink_loss_bounds']['min'],
-                   args['downlink_loss_bounds']['max']))
 
     units = []
     units.append(params['bandwidth'][0])
     units.append(params['delay'][0])
     units.append(params['uplink_queue'][0])
     units.append(params['uplink_loss'][0])
-    units.append(params['downlink_loss'][0])
 
     entropy = 0.0
     norm = []
@@ -190,11 +187,13 @@ def add_normalized_params(args, params):
 
         norm.append(x)
 
+    norm.append(params['ct_rate_portion'][0])
+
     args['bandwidth'] = max(0.0, norm[0])
     args['delay'] = max(0, int(math.ceil(norm[1])))
     args['uplink_queue'] = max(0, int(math.ceil(norm[2])))
     args['uplink_loss'] = min(1.0, max(0.0, norm[3]))
-    args['downlink_loss'] = min(1.0, max(0.0, norm[4]))
+    args['ct_rate_portion'] = min(0.5, max(0.0, norm[4]))
 
     return entropy
 
@@ -299,5 +298,5 @@ if __name__ == '__main__':
     params['delay'] = [0.0]
     params['uplink_queue'] = [0.0]
     params['uplink_loss'] = [0.0]
-    params['downlink_loss'] = [0.0]
+    params['ct_rate_portion'] = [0.0]
     main(job_id, params)
