@@ -22,7 +22,7 @@ def collect_perf_data(args, ip_dict):
     for ip in ip_dict:
         remote_perf_data = (
             '%s@%s:~/pantheon/test/data/perf_data' % (args['username'], ip))
-        scp_cmd = ['scp', remote_perf_data,
+        scp_cmd = ['scp', '-o', 'ConnectTimeout=5', remote_perf_data,
                    path.join(perf_data_dir, '%s_%d' % ip_dict[ip])]
         scp_procs.append(Popen(scp_cmd))
 
@@ -128,7 +128,8 @@ def run_experiment(args):
             ip_idx += 1
             ip_dict[ip] = (cc, run_id)
 
-            ssh_cmd = ['ssh', '%s@%s' % (args['username'], ip)]
+            ssh_cmd = ['ssh', '-o', 'ConnectTimeout=5',
+                       '%s@%s' % (args['username'], ip)]
             cmd_in_ssh = base_cmd + ' --schemes %s' % cc
             ssh_cmd += [cmd_in_ssh]
 
