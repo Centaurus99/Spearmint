@@ -14,7 +14,7 @@ def gen_trace(bw):
 
     bw = '%.2f' % bw
     cmd = ['python', gen_trace_path, '--bandwidth', bw,
-           '--output-dir', traces_dir]
+           '--output-dir', traces_dir, '--cold-start', '1']
     sys.stderr.write('+ %s\n' % ' '.join(cmd))
     check_call(cmd)
 
