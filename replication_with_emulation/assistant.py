@@ -13,7 +13,6 @@ def run_cmd(host, cmd):
                'git checkout poisson-trace; '
                'sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
                'cd ~/pantheon && git fetch --all && '
-               'git checkout poisson-trace && '
                './test/setup.py --all --setup')
     elif cmd == 'cleanup':
         cmd = ('rm -rf /tmp/pantheon-tmp; '
@@ -25,13 +24,13 @@ def run_cmd(host, cmd):
 
 def remove_key(ip):
     cmd = 'ssh-keygen -f "/home/francisyyan/.ssh/known_hosts" -R ' + ip
-    return Popen(cmd, shell=True)
+    call(cmd, shell=True)
 
 
 def test_ssh(host):
     cmd = ['ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=5',
             host, 'echo $HOSTNAME']
-    return Popen(cmd)
+    call(cmd)
 
 
 def main():
@@ -49,14 +48,15 @@ def main():
     ip_list = worker_ips()
     procs = []
 
+    sys.stderr.write('%d IPs in total\n' % len(ip_list))
+
     for ip in ip_list:
         host = args.username + '@' + ip
 
         if args.cmd == 'remove_key':
-            procs.append(remove_key(ip))
+            remove_key(ip)
         elif args.cmd == 'test_ssh':
-            sys.stderr.write('%d IPs in total\n' % len(ip_list))
-            procs.append(test_ssh(host))
+            test_ssh(host)
         else:
             procs.append(run_cmd(host, args.cmd))
 
