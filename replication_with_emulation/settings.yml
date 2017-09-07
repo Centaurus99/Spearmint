@@ -10,14 +10,6 @@ uplink_queue_bounds:
   min:
   max:
 
-uplink_loss_bounds:
-  min:
-  max:
-
-downlink_loss_bounds:
-  min:
-  max:
-
 replicate_logs:
 
 location:

@@ -9,9 +9,11 @@ from helpers import worker_ips, timeout_handler, TimeoutError
 
 def run_cmd(host, cmd):
     if cmd == 'setup':
-        cmd = ('cd ~/Spearmint && git pull; '
+        cmd = ('cd ~/Spearmint && git fetch --all && '
+               'git checkout poisson-trace; '
                'sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
-               'cd ~/pantheon && git checkout master && git pull && '
+               'cd ~/pantheon && git fetch --all && '
+               'git checkout poisson-trace && '
                './test/setup.py --all --setup')
     elif cmd == 'cleanup':
         cmd = ('rm -rf /tmp/pantheon-tmp; '
