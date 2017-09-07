@@ -9,7 +9,7 @@ from helpers import CURRDIR, parse_run_stats
 
 
 def gen_trace(bw):
-    gen_trace_path = path.join(CURRDIR, 'generate_trace.py')
+    gen_trace_path = path.join(CURRDIR, 'generate_poisson_trace.py')
     traces_dir = path.join(CURRDIR, 'traces')
 
     bw = '%.2f' % bw
@@ -18,7 +18,7 @@ def gen_trace(bw):
     sys.stderr.write('+ %s\n' % ' '.join(cmd))
     check_call(cmd)
 
-    return path.join(traces_dir, '%smbps.trace' % bw)
+    return path.join(traces_dir, '%smbps-poisson.trace' % bw)
 
 
 def run_test(args):
