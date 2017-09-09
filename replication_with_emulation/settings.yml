@@ -10,13 +10,17 @@ uplink_queue_bounds:
   min:
   max:
 
+uplink_loss_bounds:
+  min: 0.0
+  max: 0.1
+
 replicate_logs:
 
 location:
 
-run_times:
+run_times: 3
 
-username:
+username: francisyyan
 
 schemes:
   - default_tcp
