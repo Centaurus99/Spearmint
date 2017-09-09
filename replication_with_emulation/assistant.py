@@ -47,13 +47,14 @@ def main():
     ip_list = worker_ips()
     procs = []
 
+    sys.stderr.write('%d IPs in total\n' % len(ip_list))
+
     for ip in ip_list:
         host = args.username + '@' + ip
 
         if args.cmd == 'remove_key':
             procs.append(remove_key(ip))
         elif args.cmd == 'test_ssh':
-            sys.stderr.write('%d IPs in total\n' % len(ip_list))
             procs.append(test_ssh(host))
         else:
             procs.append(run_cmd(host, args.cmd))
