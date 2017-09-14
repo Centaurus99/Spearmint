@@ -6,10 +6,6 @@ delay_bounds:
   min:
   max:
 
-uplink_queue_bounds:
-  min:
-  max:
-
 uplink_loss_bounds:
   min: 0.0
   max: 0.1
