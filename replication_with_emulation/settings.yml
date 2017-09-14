@@ -14,14 +14,13 @@ replicate_logs:
 
 location:
 
-run_times:
+run_times: 3
 
-username:
+username: francisyyan
 
 schemes:
   - default_tcp
   - vegas
-  - bbr
   - ledbat
   - pcc
   - quic

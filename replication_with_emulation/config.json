@@ -21,12 +21,6 @@
             "size" : 1,
             "min"  : 0,
             "max"  : 1
-        },
-        "uplink_loss" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0,
-            "max"  : 1
         }
     }
 }
