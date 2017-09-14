@@ -10,7 +10,7 @@ from helpers import worker_ips, timeout_handler, TimeoutError
 def run_cmd(host, cmd):
     if cmd == 'setup':
         cmd = ('cd ~/Spearmint && git fetch --all && '
-               'git checkout poisson-trace; '
+               'git checkout colombia-no-delay; '
                'sudo sysctl -w net.core.default_qdisc=pfifo_fast; '
                'cd ~/pantheon && git fetch --all && '
                './test/setup.py --all --setup')

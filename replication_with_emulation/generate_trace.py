@@ -23,14 +23,9 @@ def main():
     trace_path = path.join(args.output_dir, '%smbps.trace' % args.bandwidth)
 
     # write timestamps to trace
-    ts_base = 0
     with open(trace_path, 'w') as trace:
-        for i in xrange(50):
-            ts_base += 100
-            trace.write('%d\n' % ts_base)
-
         for ts in ts_list:
-            trace.write('%d\n' % (ts_base + ts))
+            trace.write('%d\n' % ts)
 
 
 if __name__ == '__main__':

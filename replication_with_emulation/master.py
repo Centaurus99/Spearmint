@@ -71,10 +71,10 @@ def collect_perf_data(args, ip_dict):
 
 def write_search_log(args, tput_loss, delay_loss, overall_loss):
     args['search_log'].write(
-        'bandwidth=%.2f,delay=%d,uplink_queue=%d,uplink_loss=%.4f,'
+        'bandwidth=%.2f,uplink_queue=%d,uplink_loss=%.4f,'
         'tput_loss=%.2f,delay_loss=%.2f,'
         'overall_median_score=%.2f,time=%s\n'
-        % (args['bandwidth'], args['delay'],
+        % (args['bandwidth'],
            args['uplink_queue'], args['uplink_loss'],
            tput_loss, delay_loss, overall_loss, utc_date()))
 
@@ -107,7 +107,6 @@ def run_experiment(args):
 
     worker_args = []
     worker_args += ['--bandwidth', '%.2f' % args['bandwidth']]
-    worker_args += ['--delay', '%d' % args['delay']]
     worker_args += ['--uplink-queue', '%d' % args['uplink_queue']]
     worker_args += ['--uplink-loss', '%.4f' % args['uplink_loss']]
     base_cmd = 'python %s %s' % (worker, ' '.join(worker_args))
@@ -149,8 +148,6 @@ def add_normalized_params(args, params):
     bounds = []
     bounds.append((args['bandwidth_bounds']['min'],
                    args['bandwidth_bounds']['max']))
-    bounds.append((args['delay_bounds']['min'],
-                   args['delay_bounds']['max']))
     bounds.append((args['uplink_queue_bounds']['min'],
                    args['uplink_queue_bounds']['max']))
     bounds.append((args['uplink_loss_bounds']['min'],
@@ -158,7 +155,6 @@ def add_normalized_params(args, params):
 
     units = []
     units.append(params['bandwidth'][0])
-    units.append(params['delay'][0])
     units.append(params['uplink_queue'][0])
     units.append(params['uplink_loss'][0])
 
@@ -171,15 +167,15 @@ def add_normalized_params(args, params):
         eps = pow(2, -15)
         if unit_x > 1 - eps:
             unit_x = 1 - eps
-        elif i <= 2 and unit_x < eps:
+        elif i <= 1 and unit_x < eps:
             unit_x = eps
 
         if unit_x > 1.0 - 1.0 / 32.0:
             entropy += -10 * (5 + math.log(1 - unit_x, 2))
-        elif i <= 2 and unit_x < 1.0 / 32.0:
+        elif i <= 1 and unit_x < 1.0 / 32.0:
             entropy += -10 * (5 + math.log(unit_x, 2))
 
-        if i <= 2:
+        if i <= 1:
             x = unit_x * (max_x - min_x) + min_x
         else:
             c = math.log(max_x * pow(10, 4) + 1, 10)
@@ -188,9 +184,8 @@ def add_normalized_params(args, params):
         norm.append(x)
 
     args['bandwidth'] = max(0.0, norm[0])
-    args['delay'] = max(0, int(math.ceil(norm[1])))
-    args['uplink_queue'] = max(0, int(math.ceil(norm[2])))
-    args['uplink_loss'] = min(1.0, max(0.0, norm[3]))
+    args['uplink_queue'] = max(0, int(math.ceil(norm[1])))
+    args['uplink_loss'] = min(1.0, max(0.0, norm[2]))
 
     return entropy
 
@@ -292,7 +287,6 @@ if __name__ == '__main__':
     job_id = 0
     params = {}
     params['bandwidth'] = [0.0]
-    params['delay'] = [0.0]
     params['uplink_queue'] = [0.0]
     params['uplink_loss'] = [0.0]
     main(job_id, params)

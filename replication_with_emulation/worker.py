@@ -93,9 +93,9 @@ def collect_data(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bandwidth', type=float, required=True)
-    parser.add_argument('--delay', type=int, required=True)
-    parser.add_argument('--uplink-queue', type=int, required=True)
-    parser.add_argument('--uplink-loss', type=float, required=True)
+    parser.add_argument('--delay', type=int)
+    parser.add_argument('--uplink-queue', type=int)
+    parser.add_argument('--uplink-loss', type=float)
     parser.add_argument('--schemes',
                         metavar='"SCHEME1 SCHEME2..."', required=True)
     prog_args = parser.parse_args()

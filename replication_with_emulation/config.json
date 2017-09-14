@@ -10,12 +10,6 @@
             "min"  : 0,
             "max"  : 1
         },
-        "delay" : {
-            "type" : "FLOAT",
-            "size" : 1,
-            "min"  : 0,
-            "max"  : 1
-        },
         "uplink_queue" : {
             "type" : "FLOAT",
             "size" : 1,

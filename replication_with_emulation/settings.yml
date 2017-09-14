@@ -2,10 +2,6 @@ bandwidth_bounds:
   min:
   max:
 
-delay_bounds:
-  min:
-  max:
-
 uplink_queue_bounds:
   min:
   max:
