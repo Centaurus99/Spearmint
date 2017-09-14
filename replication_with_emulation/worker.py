@@ -9,16 +9,16 @@ from helpers import CURRDIR, parse_run_stats
 
 
 def gen_trace(bw):
-    gen_trace_path = path.join(CURRDIR, 'generate_poisson_trace.py')
+    gen_trace_path = path.join(CURRDIR, 'generate_trace.py')
     traces_dir = path.join(CURRDIR, 'traces')
 
     bw = '%.2f' % bw
     cmd = ['python', gen_trace_path, '--bandwidth', bw,
-           '--output-dir', traces_dir, '--cold-start', '1']
+           '--output-dir', traces_dir]
     sys.stderr.write('+ %s\n' % ' '.join(cmd))
     check_call(cmd)
 
-    return path.join(traces_dir, '%smbps-poisson.trace' % bw)
+    return path.join(traces_dir, '%smbps.trace' % bw)
 
 
 def run_test(args):
@@ -41,8 +41,9 @@ def run_test(args):
     if extra_cmds:
         cmd += ' --prepend-mm-cmds "%s"' % ' '.join(extra_cmds)
 
-    cmd += (' --extra-mm-link-args "--uplink-queue=droptail '
-            '--uplink-queue-args=packets=%d"' % args['uplink_queue'])
+    if args['uplink_queue'] > 0:
+        cmd += (' --extra-mm-link-args "--uplink-queue=droptail '
+                '--uplink-queue-args=packets=%d"' % args['uplink_queue'])
 
     sys.stderr.write('+ %s\n' % cmd)
     check_call(cmd, shell=True)
@@ -93,9 +94,9 @@ def collect_data(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--bandwidth', type=float, required=True)
-    parser.add_argument('--delay', type=int, required=True)
-    parser.add_argument('--uplink-queue', type=int, required=True)
-    parser.add_argument('--uplink-loss', type=float, required=True)
+    parser.add_argument('--delay', type=int)
+    parser.add_argument('--uplink-queue', type=int)
+    parser.add_argument('--uplink-loss', type=float)
     parser.add_argument('--schemes',
                         metavar='"SCHEME1 SCHEME2..."', required=True)
     prog_args = parser.parse_args()
