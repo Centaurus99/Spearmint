@@ -18,6 +18,8 @@ replicate_logs:
 
 location:
 
+flows:
+
 run_times: 3
 
 username: ubuntu

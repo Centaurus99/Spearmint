@@ -111,6 +111,10 @@ def run_experiment(args):
     worker_args += ['--delay', '%d' % args['delay']]
     worker_args += ['--uplink-queue', '%d' % args['uplink_queue']]
     worker_args += ['--uplink-loss', '%.4f' % args['uplink_loss']]
+
+    if args['flows'] is not None:
+        worker_args += ['-f', '%d' % args['flows']]
+
     base_cmd = 'python %s %s' % (worker, ' '.join(worker_args))
 
     ip_idx = 0

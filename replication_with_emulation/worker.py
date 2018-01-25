@@ -30,6 +30,9 @@ def run_test(args):
     # run test.py
     cmd = '~/pantheon/test/test.py local --pkill-cleanup'
 
+    if args['flows'] > 1:
+        cmd += ' -f %d' % args['flows']
+
     cmd += ' --schemes "%s"' % args['schemes']
     cmd += ' --uplink-trace %s' % args['uplink_trace']
 
@@ -89,6 +92,7 @@ def collect_data(args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--flows', type=int, default=1)
     parser.add_argument('--bandwidth', type=float, required=True)
     parser.add_argument('--delay', type=int)
     parser.add_argument('--uplink-queue', type=int)
@@ -98,6 +102,8 @@ def main():
     prog_args = parser.parse_args()
 
     args = {}
+
+    args['flows'] = prog_args.flows
 
     trace_path = gen_trace(prog_args.bandwidth)
     args['uplink_trace'] = trace_path
