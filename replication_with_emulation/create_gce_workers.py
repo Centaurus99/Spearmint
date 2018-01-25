@@ -25,7 +25,7 @@ def main():
         help='machine type to use (default: n1-standard-2, 2 cores, 7.5 GB)')
     parser.add_argument(
         '--image', metavar='IMG', default='pantheon-ubuntu-1710',
-        help='disk img to use (indigo-cpu)')
+        help='disk img to use (pantheon-ubuntu-1710)')
     parser.add_argument(
         '--disk-size', metavar='SIZE', type=int, default='10',
         help='disk size (default: 10 GB)')
