@@ -42,7 +42,7 @@ def collect_perf_data(args, ip_dict):
 
             for scheme in perf_data:
                 for flow in perf_data[scheme]:
-                    cc_flow = '%s flow%d' % (scheme, flow)
+                    cc_flow = '%s flow%d' % (scheme, int(flow))
 
                     if cc_flow not in perf:
                         perf[cc_flow] = {}
@@ -248,7 +248,7 @@ def process_replicate_logs(args):
 
             flows = parse_run_stats(stats.split('\n'))
             for flow_id in flows:
-                cc_flow = "%s flow%d" % (scheme, flow_id)
+                cc_flow = "%s flow%d" % (scheme, int(flow_id))
                 if cc_flow not in cali_data_dict:
                     cali_data_dict[cc_flow] = {}
                     cali_data_dict[cc_flow]['tput'] = []
