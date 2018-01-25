@@ -2,6 +2,7 @@
 
 import sys
 import pickle
+import json
 import argparse
 from subprocess import call, check_call
 from os import path
@@ -33,14 +34,14 @@ def run_test(args):
     cmd += ' --uplink-trace %s' % args['uplink_trace']
 
     extra_cmds = []
-    if args['delay'] > 0:
+    if args['delay'] is not None:
         extra_cmds.append('mm-delay %d' % args['delay'])
-    if args['uplink_loss'] > 0:
+    if args['uplink_loss'] is not None:
         extra_cmds.append('mm-loss uplink %s' % args['uplink_loss'])
     if extra_cmds:
         cmd += ' --prepend-mm-cmds "%s"' % ' '.join(extra_cmds)
 
-    if args['uplink_queue']:
+    if args['uplink_queue'] is not None:
         cmd += (' --extra-mm-link-args "--uplink-queue=droptail '
                 '--uplink-queue-args=packets=%d"' % args['uplink_queue'])
 
@@ -61,31 +62,27 @@ def collect_data(args):
     if not path.isfile(pickle_data_path):
         return False
 
-    perf_data_path = path.expanduser('~/pantheon/test/data/perf_data')
+    with open(pickle_data_path) as fh:
+        pickle_data = pickle.load(fh)
 
-    with open(pickle_data_path) as pickle_data_file:
-        pickle_data = pickle.load(pickle_data_file)
+    perf_data_dict = {}
 
-    with open(perf_data_path, 'w') as perf_data_f:
-        for scheme in pickle_data:
-            if len(pickle_data[scheme]) != 1:
-                return False
+    for scheme in pickle_data:
+        if len(pickle_data[scheme]) != 1:
+            return False
 
-            run_id = 1
+        run_id = 1
 
-            stats = pickle_data[scheme][run_id]
-            if stats is None:
-                return False
+        stats = pickle_data[scheme][run_id]
+        if stats is None:
+            return False
 
-            flows = parse_run_stats(stats.split('\n'))
-            if len(flows) != 1:
-                return False
+        flows = parse_run_stats(stats.split('\n'))
+        perf_data_dict[scheme] = flows
 
-            f = 1
-
-            tput = flows[f][0]
-            delay = flows[f][1]
-            perf_data_f.write('%s,%.2f,%.2f\n' % (scheme, tput, delay))
+    perf_data_path = path.expanduser('~/pantheon/test/data/perf_data.json')
+    with open(perf_data_path, 'w') as fh:
+        json.dump(perf_data_dict, fh)
 
     return True
 

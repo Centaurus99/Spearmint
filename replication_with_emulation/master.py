@@ -17,54 +17,55 @@ def collect_perf_data(args, ip_dict):
     make_sure_path_exists(perf_data_dir)
     call('rm -rf %s/*' % perf_data_dir, shell=True)
 
-    # scp perf_data
+    # scp perf_data.json
     scp_procs = []
     for ip in ip_dict:
         remote_perf_data = (
-            '%s@%s:~/pantheon/test/data/perf_data' % (args['username'], ip))
+            '%s@%s:~/pantheon/test/data/perf_data.json' % (args['username'], ip))
         scp_cmd = ['scp', '-o', 'ConnectTimeout=5', remote_perf_data,
-                   path.join(perf_data_dir, '%s_%d' % ip_dict[ip])]
+                   path.join(perf_data_dir, '%s_%d.json' % ip_dict[ip])]
         scp_procs.append(Popen(scp_cmd))
 
     for proc in scp_procs:
         proc.wait()
 
-    # parse perf_data
+    # parse perf_data.json
     perf = {}
     for cc in args['schemes']:
         for run_id in xrange(1, args['run_times'] + 1):
-            perf_data_file = path.join(perf_data_dir, '%s_%d' % (cc, run_id))
+            perf_data_file = path.join(perf_data_dir, '%s_%d.json' % (cc, run_id))
             if not path.isfile(perf_data_file):
                 continue
 
-            with open(perf_data_file) as perf_data_handle:
-                line = perf_data_handle.readline()
-                if not line:
-                    continue
+            with open(perf_data_file) as fh:
+                perf_data = json.load(fh)
 
-                perf_list = line.split(',')
-                scheme = perf_list[0]
+            for scheme in perf_data:
+                for flow in perf_data[scheme]:
+                    cc_flow = '%s flow%d' % (scheme, flow)
 
-                if scheme not in perf:
-                    perf[scheme] = {}
-                    perf[scheme]['tput'] = []
-                    perf[scheme]['delay'] = []
+                    if cc_flow not in perf:
+                        perf[cc_flow] = {}
+                        perf[cc_flow]['tput'] = []
+                        perf[cc_flow]['delay'] = []
 
-                perf[scheme]['tput'].append(float(perf_list[1]))
-                perf[scheme]['delay'].append(float(perf_list[2]))
+                    tput = float(perf_data[scheme][flow][0])
+                    delay = float(perf_data[scheme][flow][1])
+                    perf[cc_flow]['tput'].append(tput)
+                    perf[cc_flow]['delay'].append(delay)
 
-    for scheme in perf:
-        tput_list = perf[scheme]['tput']
+    for cc_flow in perf:
+        tput_list = perf[cc_flow]['tput']
         if tput_list:
-            perf[scheme]['tput'] = np.median(tput_list)
+            perf[cc_flow]['tput'] = np.median(tput_list)
         else:
-            perf[scheme]['tput'] = float('nan')
+            perf[cc_flow]['tput'] = float('nan')
 
-        delay_list = perf[scheme]['delay']
+        delay_list = perf[cc_flow]['delay']
         if delay_list:
-            perf[scheme]['delay'] = np.median(delay_list)
+            perf[cc_flow]['delay'] = np.median(delay_list)
         else:
-            perf[scheme]['delay'] = float('nan')
+            perf[cc_flow]['delay'] = float('nan')
 
     return perf
 
@@ -83,12 +84,12 @@ def compute_loss(args):
     tput_loss = 0.0
     delay_loss = 0.0
     cnt = 0
-    for cc in args['candidate_cali_data']:
-        new_tput = args['candidate_cali_data'][cc]['tput']
-        new_delay = args['candidate_cali_data'][cc]['delay']
+    for cc_flow in args['candidate_cali_data']:
+        new_tput = args['candidate_cali_data'][cc_flow]['tput']
+        new_delay = args['candidate_cali_data'][cc_flow]['delay']
 
-        orig_tput = args['orig_cali_data'][cc]['tput']
-        orig_delay = args['orig_cali_data'][cc]['delay']
+        orig_tput = args['orig_cali_data'][cc_flow]['tput']
+        orig_delay = args['orig_cali_data'][cc_flow]['delay']
 
         tput_loss += get_abs_diff(orig_tput, new_tput)
         delay_loss += get_abs_diff(orig_delay, new_delay)
@@ -117,9 +118,6 @@ def run_experiment(args):
     worker_procs = []
 
     schemes = args['schemes']
-    if 'bbr' in schemes:
-        schemes.remove('bbr')
-        schemes = ['bbr'] + schemes
 
     for cc in schemes:
         for run_id in xrange(1, args['run_times'] + 1):
@@ -206,7 +204,7 @@ def prepare_args():
         sys.exit('Wrong number of workers %d, should be %d' %
                  (num_workers, correct_num_workers))
 
-    args['search_log'] = open(args['location'] + '_search_log', 'a', 0)
+    args['search_log'] = open(args['location'] + '-search-log', 'a', 0)
 
     return args
 
@@ -220,8 +218,8 @@ def process_replicate_logs(args):
     if path.isfile(cali_data):
         sys.stderr.write('Skip processing %s as cali_data.json already '
                          'exists\n' % replicate_logs)
-        with open(cali_data) as cali_data_f:
-            cali_data_dict = json.load(cali_data_f)
+        with open(cali_data) as fh:
+            cali_data_dict = json.load(fh)
         return cali_data_dict
 
     # run plot.py and generate perf_data.pkl
@@ -233,38 +231,39 @@ def process_replicate_logs(args):
     # generate cali_data.json
     pickle_data_path = path.join(replicate_logs, 'perf_data.pkl')
 
-    with open(pickle_data_path) as pickle_data_file:
-        pickle_data = pickle.load(pickle_data_file)
+    with open(pickle_data_path) as fh:
+        pickle_data = pickle.load(fh)
 
     cali_data_dict = {}
 
     for scheme in pickle_data:
-        cali_data_dict[scheme] = {}
-        cali_data_dict[scheme]['tput'] = []
-        cali_data_dict[scheme]['delay'] = []
         for run_id in pickle_data[scheme]:
             stats = pickle_data[scheme][run_id]
             if stats is None:
                 continue
 
             flows = parse_run_stats(stats.split('\n'))
-            assert len(flows) == 1
-            f = 1
+            for flow_id in flows:
+                cc_flow = "%s flow%d" % (scheme, flow_id)
+                if cc_flow not in cali_data_dict:
+                    cali_data_dict[cc_flow] = {}
+                    cali_data_dict[cc_flow]['tput'] = []
+                    cali_data_dict[cc_flow]['delay'] = []
 
-            tput = flows[f][0]
-            delay = flows[f][1]
-            cali_data_dict[scheme]['tput'].append(float(tput))
-            cali_data_dict[scheme]['delay'].append(float(delay))
+                tput = float(flows[flow_id][0])
+                delay = float(flows[flow_id][1])
+                cali_data_dict[cc_flow]['tput'].append(tput)
+                cali_data_dict[cc_flow]['delay'].append(delay)
 
-    for scheme in cali_data_dict:
-        tput_list = cali_data_dict[scheme]['tput']
-        cali_data_dict[scheme]['tput'] = np.median(tput_list)
+    for cc_flow in cali_data_dict:
+        tput_list = cali_data_dict[cc_flow]['tput']
+        cali_data_dict[cc_flow]['tput'] = np.median(tput_list)
 
-        delay_list = cali_data_dict[scheme]['delay']
-        cali_data_dict[scheme]['delay'] = np.median(delay_list)
+        delay_list = cali_data_dict[cc_flow]['delay']
+        cali_data_dict[cc_flow]['delay'] = np.median(delay_list)
 
-    with open(cali_data, 'w') as cali_data_f:
-        json.dump(cali_data_dict, cali_data_f)
+    with open(cali_data, 'w') as fh:
+        json.dump(cali_data_dict, fh)
 
     return cali_data_dict
 
