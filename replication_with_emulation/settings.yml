@@ -20,6 +20,8 @@ location:
 
 flows:
 
+interval:
+
 run_times: 3
 
 username: ubuntu

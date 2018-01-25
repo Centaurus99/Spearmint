@@ -115,6 +115,9 @@ def run_experiment(args):
     if args['flows'] is not None:
         worker_args += ['-f', '%d' % args['flows']]
 
+    if args['interval'] is not None:
+        worker_args += ['--interval', '%d' % args['interval']]
+
     base_cmd = 'python %s %s' % (worker, ' '.join(worker_args))
 
     ip_idx = 0

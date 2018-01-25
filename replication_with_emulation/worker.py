@@ -33,6 +33,9 @@ def run_test(args):
     if args['flows'] > 1:
         cmd += ' -f %d' % args['flows']
 
+        if args['interval'] > 0:
+            cmd += ' --interval %d' % args['interval']
+
     cmd += ' --schemes "%s"' % args['schemes']
     cmd += ' --uplink-trace %s' % args['uplink_trace']
 
@@ -93,6 +96,7 @@ def collect_data(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--flows', type=int, default=1)
+    parser.add_argument('--interval', type=int, default=0)
     parser.add_argument('--bandwidth', type=float, required=True)
     parser.add_argument('--delay', type=int)
     parser.add_argument('--uplink-queue', type=int)
@@ -104,6 +108,7 @@ def main():
     args = {}
 
     args['flows'] = prog_args.flows
+    args['interval'] = prog_args.interval
 
     trace_path = gen_trace(prog_args.bandwidth)
     args['uplink_trace'] = trace_path
