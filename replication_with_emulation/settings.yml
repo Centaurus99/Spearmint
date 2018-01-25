@@ -20,7 +20,7 @@ location:
 
 run_times: 3
 
-username: francisyyan
+username: ubuntu
 
 schemes:
   - default_tcp

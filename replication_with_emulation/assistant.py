@@ -22,7 +22,7 @@ def run_cmd(host, cmd):
 
 
 def remove_key(ip):
-    cmd = 'ssh-keygen -f "/home/francisyyan/.ssh/known_hosts" -R ' + ip
+    cmd = 'ssh-keygen -f "/home/ubuntu/.ssh/known_hosts" -R ' + ip
     return Popen(cmd, shell=True)
 
 
@@ -36,8 +36,8 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--username', default='francisyyan',
-        help='username used in ssh (default: francisyyan)')
+        '--username', default='ubuntu',
+        help='username used in ssh (default: ubuntu)')
     parser.add_argument(
         '--pantheon-dir', metavar='DIR', default='~/pantheon',
         help='path to pantheon/ (default: ~/pantheon)')
