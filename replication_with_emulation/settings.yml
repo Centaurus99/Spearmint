@@ -1,22 +1,22 @@
 bandwidth_bounds:
-  min:
-  max:
+  min: 5
+  max: 40
 
 delay_bounds:
-  min:
-  max:
+  min: 0
+  max: 50
 
 uplink_queue_bounds:
-  min:
-  max:
+  min: 10
+  max: 500
 
 uplink_loss_bounds:
   min: 0.0
   max: 0.1
 
-replicate_logs:
+replicate_logs: .
 
-location:
+location: test
 
 flows:
 
@@ -24,16 +24,10 @@ interval:
 
 run_times: 3
 
-username: ubuntu
+username: vagrant
 
 schemes:
   - default_tcp
   - vegas
   - bbr
-  - ledbat
-  - pcc
-  - quic
-  - scream
-  - sprout
-  - taova
-  - verus
+  - kern_copa

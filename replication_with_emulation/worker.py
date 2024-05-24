@@ -9,9 +9,9 @@ from os import path
 from helpers import CURRDIR, parse_run_stats
 
 
-def gen_trace(bw):
+def gen_trace(bw, args):
     gen_trace_path = path.join(CURRDIR, 'generate_trace.py')
-    traces_dir = path.join(CURRDIR, 'traces')
+    traces_dir = path.join(CURRDIR, 'traces_%s_%d' % (args['schemes'], args['run_id']))
 
     bw = '%.2f' % bw
     cmd = ['python', gen_trace_path, '--bandwidth', bw,
@@ -24,11 +24,12 @@ def gen_trace(bw):
 
 def run_test(args):
     # remove contents in ~/pantheon/test/data
-    data_dir = path.expanduser('~/pantheon/test/data')
+    data_dir = path.expanduser('~/pantheon/test/data_%s_%d' % (args['schemes'], args['run_id']))
     call('rm -rf %s/*' % data_dir, shell=True)
 
     # run test.py
     cmd = '~/pantheon/test/test.py local --pkill-cleanup'
+    cmd += ' --data-dir "%s"' % data_dir
 
     if args['flows'] > 1:
         cmd += ' -f %d' % args['flows']
@@ -57,14 +58,16 @@ def run_test(args):
 
 def run_analysis(args):
     # run plot.py and generate pantheon/test/data/perf_data.pkl
+    data_dir = path.expanduser('~/pantheon/test/data_%s_%d' % (args['schemes'], args['run_id']))
     cmd = '~/pantheon/analysis/plot.py --no-graphs'
+    cmd += ' --data-dir "%s"' % data_dir
     sys.stderr.write('+ %s\n' % cmd)
     check_call(cmd, shell=True)
 
 
 def collect_data(args):
     # write cc, tput, delay to perf_data
-    pickle_data_path = path.expanduser('~/pantheon/test/data/perf_data.pkl')
+    pickle_data_path = path.expanduser('~/pantheon/test/data_%s_%d/perf_data.pkl' % (args['schemes'], args['run_id']))
     if not path.isfile(pickle_data_path):
         return False
 
@@ -86,7 +89,7 @@ def collect_data(args):
         flows = parse_run_stats(stats.split('\n'))
         perf_data_dict[scheme] = flows
 
-    perf_data_path = path.expanduser('~/pantheon/test/data/perf_data.json')
+    perf_data_path = path.expanduser('~/pantheon/test/data_%s_%d/perf_data.json' % (args['schemes'], args['run_id']))
     with open(perf_data_path, 'w') as fh:
         json.dump(perf_data_dict, fh)
 
@@ -95,6 +98,7 @@ def collect_data(args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--run_id', type=int, required=True)
     parser.add_argument('-f', '--flows', type=int, default=1)
     parser.add_argument('--interval', type=int, default=0)
     parser.add_argument('--bandwidth', type=float, required=True)
@@ -107,17 +111,19 @@ def main():
 
     args = {}
 
+    args['run_id'] = prog_args.run_id
     args['flows'] = prog_args.flows
     args['interval'] = prog_args.interval
-
-    trace_path = gen_trace(prog_args.bandwidth)
-    args['uplink_trace'] = trace_path
-    args['downlink_trace'] = trace_path
-
+    
     args['delay'] = prog_args.delay
     args['uplink_queue'] = prog_args.uplink_queue
     args['uplink_loss'] = prog_args.uplink_loss
     args['schemes'] = prog_args.schemes
+
+    trace_path = gen_trace(prog_args.bandwidth, args)
+    args['uplink_trace'] = trace_path
+    args['downlink_trace'] = trace_path
+
 
     RERUN = 1
     for i in xrange(RERUN + 1):  # run tests at most twice

@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import importlib
 import sys
 from itertools import izip
@@ -131,7 +134,7 @@ def main():
 
     ax.plot(xy[:,0], xy[:,1], vals, marker='o', color="r", linestyle="None")
     
-    plt.show()
+    plt.savefig(expt_dir + "/plot.png")
     
 
     

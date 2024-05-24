@@ -19,11 +19,11 @@ def collect_perf_data(args, ip_dict):
 
     # scp perf_data.json
     scp_procs = []
-    for ip in ip_dict:
+    for ip_idx in ip_dict:
         remote_perf_data = (
-            '%s@%s:~/pantheon/test/data/perf_data.json' % (args['username'], ip))
+            '%s@%s:~/pantheon/test/data_%s_%d/perf_data.json' % (args['username'], args['ips'][ip_idx], ip_dict[ip_idx][0], ip_dict[ip_idx][1]))
         scp_cmd = ['scp', '-o', 'ConnectTimeout=5', remote_perf_data,
-                   path.join(perf_data_dir, '%s_%d.json' % ip_dict[ip])]
+                   path.join(perf_data_dir, '%s_%d.json' % ip_dict[ip_idx])]
         scp_procs.append(Popen(scp_cmd))
 
     for proc in scp_procs:
@@ -129,16 +129,18 @@ def run_experiment(args):
     for cc in schemes:
         for run_id in xrange(1, args['run_times'] + 1):
             ip = args['ips'][ip_idx]
+            ip_dict[ip_idx] = (cc, run_id)
             ip_idx += 1
-            ip_dict[ip] = (cc, run_id)
 
             ssh_cmd = ['ssh', '-o', 'ConnectTimeout=5',
                        '%s@%s' % (args['username'], ip)]
             cmd_in_ssh = base_cmd + ' --schemes %s' % cc
+            cmd_in_ssh = cmd_in_ssh + ' --run_id %d' % run_id
             ssh_cmd += [cmd_in_ssh]
 
             sys.stderr.write('+ %s\n' % ' '.join(ssh_cmd))
             worker_procs.append(Popen(ssh_cmd))
+            time.sleep(0.5)
 
     for proc in worker_procs:
         proc.wait()
@@ -278,6 +280,10 @@ def process_replicate_logs(args):
 def main(job_id, params):
     args = prepare_args()
 
+    # clean the contents in /tmp/pantheon-tmp
+    clean_tmp_cmd = 'rm -rf /tmp/pantheon-tmp/*'
+    call(clean_tmp_cmd, shell=True)
+
     # process replicate_logs
     orig_cali_data = process_replicate_logs(args)
     args['orig_cali_data'] = orig_cali_data
@@ -297,8 +303,8 @@ def main(job_id, params):
 if __name__ == '__main__':
     job_id = 0
     params = {}
-    params['bandwidth'] = [0.0]
-    params['delay'] = [0.0]
-    params['uplink_queue'] = [0.0]
-    params['uplink_loss'] = [0.0]
+    params['delay'] = [0.350677]
+    params['bandwidth'] = [0.379486]
+    params['uplink_queue'] = [0.168243]
+    params['uplink_loss'] = [0.113007]
     main(job_id, params)

@@ -1,7 +1,7 @@
 {
     "language"        : "PYTHON",
     "main-file"       : "master.py",
-    "experiment-name" : "replication",
+    "experiment-name" : "20240522-exp-normal",
     "likelihood"      : "GAUSSIAN",
     "variables" : {
         "bandwidth" : {
